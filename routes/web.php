@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\SakaiThemeController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 /*
@@ -16,13 +18,35 @@ use Inertia\Inertia;
 |
 */
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+function getPageNameFromUri($uri): string
+{
+    $uri = ltrim($uri, '/');
+    $page = last(explode('/', $uri));
+    return Str::replace($page, Str::ucfirst($page), $uri);
+}
+
+Route::get('/{pageName?}', function ($pageName = 'Dashboard') {
+//    return Inertia::render('Welcome', [
+//        'canLogin' => Route::has('login'),
+//        'canRegister' => Route::has('register'),
+//        'laravelVersion' => Application::VERSION,
+//        'phpVersion' => PHP_VERSION,
+//    ]);
+    return Inertia::render(Str::ucfirst($pageName));
+});
+
+Route::get('/uikit/{page}', function (Request $request, $page) {
+    return Inertia::render(getPageNameFromUri($request->getRequestUri()));
+});
+
+Route::get('get/{item}', [SakaiThemeController::class, 'getData']);
+
+Route::get('utilities/{pageName}', function (Request $request, $pageName) {
+    return Inertia::render(getPageNameFromUri($request->getRequestUri()));
+});
+
+Route::get('Auth/{pageName}', function (Request $request, $pageName) {
+    return Inertia::render(getPageNameFromUri($request->getRequestUri()));
 });
 
 Route::get('/dashboard', function () {

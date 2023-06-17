@@ -1,90 +1,65 @@
-<script setup lang="ts">
-import Checkbox from '@/Components/Checkbox.vue';
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+<script setup>
+import { useLayout } from '@/Layouts/composables/layout';
+import { ref, computed } from 'vue';
+import AppConfig from '@/Layouts/AppConfig.vue';
+import BaseService from "@/service/BaseService.js";
+import EmptyLayout from "@/Layouts/EmptyLayout.vue";
 
-defineProps<{
-    canResetPassword?: boolean;
-    status?: string;
-}>();
+const { layoutConfig } = useLayout();
+const email = ref('');
+const password = ref('');
+const checked = ref(false);
+const baseUrl = (new BaseService()).getBaseUrl()
 
-const form = useForm({
-    email: '',
-    password: '',
-    remember: false,
+const logoUrl = computed(() => {
+    return `${baseUrl}/layout/images/${layoutConfig.darkTheme.value ? 'logo-white' : 'logo-dark'}.svg`;
 });
-
-const submit = () => {
-    form.post(route('login'), {
-        onFinish: () => form.reset('password'),
-    });
-};
+defineOptions({ layout: EmptyLayout })
 </script>
 
 <template>
-    <GuestLayout>
-        <Head title="Log in" />
+    <div class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
+        <div class="flex flex-column align-items-center justify-content-center">
+            <img :src="logoUrl" alt="Sakai logo" class="mb-5 w-6rem flex-shrink-0" />
+            <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
+                <div class="w-full surface-card py-8 px-5 sm:px-8" style="border-radius: 53px">
+                    <div class="text-center mb-5">
+                        <img src="/demo/images/login/avatar.png" alt="Image" height="50" class="mb-3" />
+                        <div class="text-900 text-3xl font-medium mb-3">Welcome, Isabel!</div>
+                        <span class="text-600 font-medium">Sign in to continue</span>
+                    </div>
 
-        <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
-            {{ status }}
+                    <div>
+                        <label for="email1" class="block text-900 text-xl font-medium mb-2">Email</label>
+                        <InputText id="email1" type="text" placeholder="Email address" class="w-full md:w-30rem mb-5" style="padding: 1rem" v-model="email" />
+
+                        <label for="password1" class="block text-900 font-medium text-xl mb-2">Password</label>
+                        <Password id="password1" v-model="password" placeholder="Password" :toggleMask="true" class="w-full mb-3" inputClass="w-full" inputStyle="padding:1rem"></Password>
+
+                        <div class="flex align-items-center justify-content-between mb-5 gap-5">
+                            <div class="flex align-items-center">
+                                <Checkbox v-model="checked" id="rememberme1" binary class="mr-2"></Checkbox>
+                                <label for="rememberme1">Remember me</label>
+                            </div>
+                            <a class="font-medium no-underline ml-2 text-right cursor-pointer" style="color: var(--primary-color)">Forgot password?</a>
+                        </div>
+                        <Button label="Sign In" class="w-full p-3 text-xl"></Button>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="current-password"
-                />
-
-                <InputError class="mt-2" :message="form.errors.password" />
-            </div>
-
-            <div class="block mt-4">
-                <label class="flex items-center">
-                    <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ml-2 text-sm text-gray-600">Remember me</span>
-                </label>
-            </div>
-
-            <div class="flex items-center justify-end mt-4">
-                <Link
-                    v-if="canResetPassword"
-                    :href="route('password.request')"
-                    class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                    Forgot your password?
-                </Link>
-
-                <PrimaryButton class="ml-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Log in
-                </PrimaryButton>
-            </div>
-        </form>
-    </GuestLayout>
+    </div>
+    <AppConfig simple />
 </template>
+
+<style scoped>
+.pi-eye {
+    transform: scale(1.6);
+    margin-right: 1rem;
+}
+
+.pi-eye-slash {
+    transform: scale(1.6);
+    margin-right: 1rem;
+}
+</style>
